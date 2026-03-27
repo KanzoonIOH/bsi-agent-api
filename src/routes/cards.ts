@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { getCardById } from "../data/seed";
+import { getCardById } from "../data";
 
 const router = Router();
 
@@ -30,9 +30,9 @@ function creditOnly(res: Response, id: string): void {
 
 // ─── GET /cards/:id/balance ───────────────────────────────────────────────────
 
-router.get("/:id/balance", (req: Request, res: Response) => {
+router.get("/:id/balance", async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
-  const card = getCardById(id);
+  const card = await getCardById(id);
   if (!card) return notFound(res, id);
   if (card.cardType !== "credit") return creditOnly(res, id);
 
@@ -47,9 +47,9 @@ router.get("/:id/balance", (req: Request, res: Response) => {
 
 // ─── GET /cards/:id/limit ─────────────────────────────────────────────────────
 
-router.get("/:id/limit", (req: Request, res: Response) => {
+router.get("/:id/limit", async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
-  const card = getCardById(id);
+  const card = await getCardById(id);
   if (!card) return notFound(res, id);
   if (card.cardType !== "credit") return creditOnly(res, id);
 
@@ -70,9 +70,9 @@ router.get("/:id/limit", (req: Request, res: Response) => {
 
 // ─── GET /cards/:id/billing ───────────────────────────────────────────────────
 
-router.get("/:id/billing", (req: Request, res: Response) => {
+router.get("/:id/billing", async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
-  const card = getCardById(id);
+  const card = await getCardById(id);
   if (!card) return notFound(res, id);
   if (card.cardType !== "credit") return creditOnly(res, id);
 
@@ -88,9 +88,9 @@ router.get("/:id/billing", (req: Request, res: Response) => {
 
 // ─── GET /cards/:id/rewards ───────────────────────────────────────────────────
 
-router.get("/:id/rewards", (req: Request, res: Response) => {
+router.get("/:id/rewards", async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
-  const card = getCardById(id);
+  const card = await getCardById(id);
   if (!card) return notFound(res, id);
 
   ok(res, {
@@ -104,9 +104,9 @@ router.get("/:id/rewards", (req: Request, res: Response) => {
 
 // ─── GET /cards/:id/status ────────────────────────────────────────────────────
 
-router.get("/:id/status", (req: Request, res: Response) => {
+router.get("/:id/status", async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
-  const card = getCardById(id);
+  const card = await getCardById(id);
   if (!card) return notFound(res, id);
 
   ok(res, {

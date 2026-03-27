@@ -1,26 +1,54 @@
 services:
-    bsi-agent-api:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            target: production
-        container_name: bsi-agent-api
-        ports:
-            - "3333:3333"
-        environment:
-            NODE_ENV: production
-            PORT: 3333
-            ENABLE_AUTH: "false" # set to "true" + add JWT_SECRET to enable auth
-            # JWT_SECRET: change-me
-        restart: unless-stopped
-        healthcheck:
-            test: ["CMD", "wget", "-qO-", "http://localhost:3333/health"]
-            interval: 30s
-            timeout: 5s
-            retries: 3
-            start_period: 10s
-        networks:
-            - shared-net
+  postgres:
+    image: postgres:16-alpine
+    container_name: bsi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bsi
+      POSTGRES_PASSWORD: bsi_secret
+      POSTGRES_DB: bsi_agent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bsi -d bsi_agent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  bsi-agent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: bsi-agent-api
+    ports:
+      - "3333:3333"
+    environment:
+      NODE_ENV: production
+      PORT: 3333
+      ENABLE_AUTH: "false" # set to "true" + add JWT_SECRET to enable auth
+      # JWT_SECRET: change-me
+      # DATABASE_URL: postgresql://bsi:bsi_secret@postgres:5432/bsi_agent
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3333/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - shared-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    networks:
+      - shared-net
 networks:
-    shared-net:
-        external: true
+  shared-net:
+    external: true

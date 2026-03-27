@@ -3,7 +3,7 @@ import {
   getAccountById,
   getAllAccounts,
   getTransactionsByAccount,
-} from "../data/seed";
+} from "../data";
 
 const router = Router();
 
@@ -23,8 +23,8 @@ function notFound(res: Response, resource: string, id: string): void {
 
 // ─── GET /accounts/summary ────────────────────────────────────────────────────
 
-router.get("/summary", (_req: Request, res: Response) => {
-  const all = getAllAccounts();
+router.get("/summary", async (_req: Request, res: Response) => {
+  const all = await getAllAccounts();
   const activeAccounts = all.filter((a) => a.status === "active");
 
   const totalAvailableBalance = activeAccounts.reduce(
@@ -50,9 +50,9 @@ router.get("/summary", (_req: Request, res: Response) => {
 
 // ─── GET /accounts/:id/balance ────────────────────────────────────────────────
 
-router.get("/:id/balance", (req: Request, res: Response) => {
+router.get("/:id/balance", async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
-  const account = getAccountById(id);
+  const account = await getAccountById(id);
   if (!account) return notFound(res, "Account", id);
 
   ok(res, {
@@ -76,16 +76,16 @@ router.get("/:id/balance", (req: Request, res: Response) => {
 //   ?to=YYYY-MM-DD        — end date filter
 //   ?status=pending       — filter by status
 
-router.get("/:id/transactions", (req: Request, res: Response) => {
+router.get("/:id/transactions", async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
-  const account = getAccountById(id);
+  const account = await getAccountById(id);
   if (!account) return notFound(res, "Account", id);
 
   const { limit, from, to, status } = req.query as Record<string, string>;
 
   const parsedLimit = limit ? parseInt(limit, 10) : 10;
 
-  const txns = getTransactionsByAccount(id, {
+  const txns = await getTransactionsByAccount(id, {
     limit: isNaN(parsedLimit) ? 10 : parsedLimit,
     from,
     to,

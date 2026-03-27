@@ -1,13 +1,13 @@
 import { Router, Request, Response } from "express";
-import { getTransactionById } from "../data/seed";
+import { getTransactionById } from "../data";
 
 const router = Router();
 
 // ─── GET /transactions/:txn_id ────────────────────────────────────────────────
 
-router.get("/:txn_id", (req: Request, res: Response) => {
+router.get("/:txn_id", async (req: Request, res: Response) => {
   const txnId = req.params["txn_id"] as string;
-  const txn = getTransactionById(txnId);
+  const txn = await getTransactionById(txnId);
 
   if (!txn) {
     res.status(404).json({
